@@ -3,6 +3,7 @@ from django.core.cache import cache
 from django.http import JsonResponse, HttpResponse
 from django.utils.deprecation import MiddlewareMixin
 from django.urls import reverse
+from django.db import transaction
 
 TTL = 60 * 60  # 1 jam
 
@@ -31,3 +32,9 @@ class IdempotencyMiddleware(MiddlewareMixin):
         if 200 <= response.status_code < 400:
             cache.set(cache_key, (response.content.decode(), response.status_code), TTL)
         return response
+
+
+class AtomicRequestMiddleware(MiddlewareMixin):
+    def process_view(self, request, view_func, view_args, view_kwargs):
+        with transaction.atomic():
+            return view_func(request, *view_args, **view_kwargs)

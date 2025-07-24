@@ -26,15 +26,7 @@ ALLOWED_HOSTS = ['*']
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-3pbr$*g!v*(@7v$*@@m7f2!ga(j0dp9z@-)sy^ssyyvqt%2zek'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
+AUTH_USER_MODEL = 'core.CustomUser'
 
 # Application definition
 
@@ -45,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'core',
     'wallet',
 ]
 
@@ -57,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'wallet.middleware.IdempotencyMiddleware',
+    'wallet.middleware.AtomicRequestMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'

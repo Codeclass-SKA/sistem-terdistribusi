@@ -1,0 +1,22 @@
+LANGKAH LANJUTAN SETELAH IDEMPOTENCY
+Transaksi & Atomicity
+• Pelajari cara membungkus operasi multi-tabel di Django (transaction.atomic, on_commit, select_for_update).
+• Latihan: ubah top-up Anda jadi “saldo + log” dalam satu transaksi.
+Race-Condition Control
+• Locking optimis (F() expressions) vs locking pessimis (select_for_update).
+• Contoh: dua request top-up bersamaan, pastikan saldo tidak minus.
+Outbox / SAGA Pattern
+• Gunakan Django signal + outbox table agar event (kirim email, push notif) tetap terkirim walau server restart.
+• Praktik: simpan row di Outbox, lalu worker lain membacanya.
+Horizontal Scalability
+• Deploy 2+ container Django di belakang load-balancer → pastikan cache idempotency & session external (Redis).
+• Latihan: buat skrip docker-compose dengan Nginx + 2 Gunicorn.
+Observabilitas
+• Integrasikan Prometheus + Grafana untuk metrik latency & hit cache idempotency.
+• Tambahkan middleware otomatis trace-ID ke setiap request.
+Security Hardening
+• Rate-limit (django-ratelimit), CORS, CSRF double-submit token untuk SPA.
+• Validasi maksimum amount, input sanitization.
+Continuous Delivery
+• GitHub Actions → test → build image → push ke registry → deploy.
+• Tambahkan smoke test: POST top-up dengan idempotency key, assert 200 lalu 200 lagi.
