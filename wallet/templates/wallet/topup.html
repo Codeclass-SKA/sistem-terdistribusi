@@ -1,0 +1,9 @@
+<!doctype html>
+<title>Idempo Demo</title>
+<h2>Top-Up Saldo</h2>
+<form method="post" action="{% url 'topup_submit' %}">
+  {% csrf_token %}
+  <input type="hidden" name="_idempotency_key" value="{{ uuid }}">
+  <label>Jumlah: <input type="number" name="amount" min="1" required></label>
+  <button type="submit">Kirim</button>
+</form>
