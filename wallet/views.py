@@ -1,12 +1,10 @@
+import uuid
+
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.db import transaction
 from .models import TopUp, TopUpLog
 from django.contrib.auth import get_user_model
-
-import uuid
-
-User = get_user_model()
 
 
 def topup_form(request):
@@ -19,7 +17,7 @@ def topup_submit(request):
     if amount <= 0:
         return JsonResponse({'error': 'invalid amount'}, status=400)
 
-    # Ambil user yang ada
+    User = get_user_model()
     user = User.objects.first()  # Ambil user pertama yang ada
     if not user:
         return JsonResponse({'error': 'no user available'}, status=400)
@@ -29,5 +27,9 @@ def topup_submit(request):
 
     # Catat log
     TopUpLog.objects.create(topup=topup, message=f"Top-up of {amount} for user {user.username}")
+
+    # Perbarui saldo user
+    user.balance += amount
+    user.save()
 
     return JsonResponse({'detail': 'topup ok', 'amount': amount})
