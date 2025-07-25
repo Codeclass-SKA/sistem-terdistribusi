@@ -4,3 +4,4 @@ __pycache__/
 wallet/__pycache__/
 core/__pycache__/
 forge.yaml
+progress-update.md
