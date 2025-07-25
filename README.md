@@ -4,6 +4,71 @@
 
 Proyek ini merupakan implementasi sistem wallet/dompet digital berbasis Django yang mendemonstrasikan konsep-konsep penting dalam sistem terdistribusi, khususnya **idempotency**, **atomicity**, dan **concurrency control**. Sistem ini dirancang sebagai fondasi untuk aplikasi fintech yang memerlukan konsistensi data dan penanganan transaksi yang aman.
 
+## Quick Start
+
+### Prerequisites
+- Docker dan Docker Compose
+- Git
+
+### Setup dan Menjalankan Sistem
+
+**Docker Compose v2 (direkomendasikan):**
+```bash
+# Clone repository
+git clone <repository-url>
+cd sistem-terdistribusi
+
+# Start semua services
+docker compose up -d
+
+# Tunggu hingga semua services ready, kemudian jalankan migrasi
+docker compose exec web python manage.py migrate
+
+# Buat superuser (optional)
+docker compose exec web python manage.py createsuperuser
+
+# Verifikasi dengan menjalankan tests
+docker compose exec web python manage.py test -v 2
+
+# Akses aplikasi
+# - Web Interface: http://localhost:8000
+# - Admin Panel: http://localhost:8000/admin
+# - API Status: http://localhost:8000/api/status
+```
+
+**Docker Compose v1:**
+```bash
+# Start semua services
+docker-compose up -d
+
+# Migrasi dan setup
+docker-compose exec web python manage.py migrate
+docker-compose exec web python manage.py createsuperuser
+
+# Verifikasi dengan tests
+docker-compose exec web python manage.py test -v 2
+```
+
+### Menghentikan Sistem
+
+**Docker Compose v2:**
+```bash
+# Stop semua services
+docker compose down
+
+# Stop dan hapus volumes (database akan terhapus)
+docker compose down -v
+```
+
+**Docker Compose v1:**
+```bash
+# Stop semua services
+docker-compose down
+
+# Stop dan hapus volumes (database akan terhapus)
+docker-compose down -v
+```
+
 ## Arsitektur Sistem
 
 ### 1. Teknologi Stack
@@ -141,6 +206,143 @@ class AtomicRequestMiddleware(MiddlewareMixin):
 1. Database migrations
 2. Superuser creation (admin/admin)
 3. Development server startup pada port 8000
+
+## Testing dan Development
+
+### Menjalankan Test Suite
+
+Sistem ini memiliki comprehensive test suite yang mencakup semua komponen utama. Gunakan command berikut untuk menjalankan tests:
+
+**Docker Compose v2 (format baru - tanpa dash):**
+```bash
+# Menjalankan semua tests
+docker compose exec web python manage.py test -v 2
+
+# Menjalankan test spesifik aplikasi
+docker compose exec web python manage.py test wallet.tests -v 2
+docker compose exec web python manage.py test core.tests -v 2
+docker compose exec web python manage.py test order_service.tests -v 2
+docker compose exec web python manage.py test inventory_service.tests -v 2
+
+# Menjalankan test class spesifik
+docker compose exec web python manage.py test wallet.tests.WalletIdempotencyTest -v 2
+docker compose exec web python manage.py test wallet.tests.WalletTransactionTest -v 2
+
+# Menjalankan test method spesifik
+docker compose exec web python manage.py test wallet.tests.WalletIdempotencyTest.test_topup_idempotency -v 2
+```
+
+**Docker Compose v1 (format lama - dengan dash):**
+```bash
+# Menjalankan semua tests
+docker-compose exec web python manage.py test -v 2
+
+# Menjalankan test spesifik aplikasi
+docker-compose exec web python manage.py test wallet.tests -v 2
+docker-compose exec web python manage.py test core.tests -v 2
+docker-compose exec web python manage.py test order_service.tests -v 2
+docker-compose exec web python manage.py test inventory_service.tests -v 2
+
+# Menjalankan test class spesifik
+docker-compose exec web python manage.py test wallet.tests.WalletIdempotencyTest -v 2
+docker-compose exec web python manage.py test wallet.tests.WalletTransactionTest -v 2
+
+# Menjalankan test method spesifik
+docker-compose exec web python manage.py test wallet.tests.WalletIdempotencyTest.test_topup_idempotency -v 2
+```
+
+**Catatan:** Gunakan format tanpa dash untuk Docker Compose v2 (lebih baru) atau format dengan dash untuk v1 (lebih lama).
+
+### Test Coverage
+
+Sistem memiliki 49 test cases yang mencakup:
+
+**Core Tests:**
+- CustomUser model creation dan validasi
+- Dashboard dan API status endpoints
+- User authentication dan permissions
+
+**Wallet Tests:**
+- Model creation (TopUp, TopUpLog)
+- API endpoints (form view, submit validation)
+- **Idempotency testing** - memastikan duplicate requests tidak diproses ulang
+- **Transaction safety** - atomic operations dan race condition prevention
+
+**Order Service Tests:**
+- Order lifecycle management
+- Payment processing dengan wallet integration
+- Order status tracking dan history
+- Cancellation dengan refund functionality
+
+**Inventory Service Tests:**
+- Product dan stock management
+- Stock reservation system
+- Stock movement tracking
+- Expired reservation cleanup
+
+### Database Operations
+
+```bash
+# Membuat dan menjalankan migrasi
+docker-compose exec web python manage.py makemigrations
+docker-compose exec web python manage.py migrate
+
+# Membuat superuser
+docker-compose exec web python manage.py createsuperuser
+
+# Akses Django shell
+docker-compose exec web python manage.py shell
+
+# Melihat status migrasi
+docker-compose exec web python manage.py showmigrations
+```
+
+### Development Tools
+
+```bash
+# Melihat logs container
+docker-compose logs web
+docker-compose logs db
+docker-compose logs redis
+
+# Restart services
+docker-compose restart web
+docker-compose restart db
+
+# Rebuild dan restart
+docker-compose up --build -d
+```
+
+### Troubleshooting
+
+**Jika test gagal atau container tidak berjalan:**
+
+```bash
+# Check status semua services
+docker-compose ps
+
+# Restart semua services
+docker-compose down && docker-compose up -d
+
+# Check logs untuk error messages
+docker-compose logs web --tail 50
+
+# Reset database (hati-hati: akan hapus data)
+docker-compose down -v
+docker-compose up -d
+docker-compose exec web python manage.py migrate
+```
+
+**Jika ada error "connection refused":**
+- Pastikan semua services running: `docker-compose ps`
+- Wait beberapa detik untuk database startup setelah `docker-compose up -d`
+- Check network connectivity: `docker-compose exec web ping db`
+
+**Performance Tips:**
+- Gunakan `docker-compose up -d` untuk background execution
+- Monitor resource usage: `docker stats`
+- Clean unused containers: `docker system prune`
+
 
 ## Evaluasi Kualitas Sistem
 
