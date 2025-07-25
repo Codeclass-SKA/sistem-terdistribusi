@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distributed System Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .services {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .service-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .service-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        
+        .method {
+            font-weight: bold;
+            display: inline-block;
+            width: 60px;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        
+        .get { background-color: #28a745; }
+        .post { background-color: #007bff; }
+        .put { background-color: #ffc107; color: #333; }
+        .delete { background-color: #dc3545; }
+        
+        .url {
+            font-family: 'Courier New', monospace;
+            color: #333;
+            margin-left: 10px;
+        }
+        
+        .status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .status-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .status-card h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .status-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        .online { background-color: #28a745; }
+        .offline { background-color: #dc3545; }
+        
+        .footer {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 5px;
+            transition: background 0.3s ease;
+        }
+        
+        .button:hover {
+            background: #5a6fd8;
+        }
+        
+        .test-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        #test-output {
+            background: #1e1e1e;
+            color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Distributed System Dashboard</h1>
+            <p>Wallet • Inventory • Order Management System</p>
+        </div>
+        
+        <div class="status">
+            <div class="status-card">
+                <h4><span class="status-indicator" id="web-status"></span>Web Service</h4>
+                <p id="web-text">Checking...</p>
+            </div>
+            <div class="status-card">
+                <h4><span class="status-indicator" id="db-status"></span>Database</h4>
+                <p id="db-text">PostgreSQL</p>
+            </div>
+            <div class="status-card">
+                <h4><span class="status-indicator" id="redis-status"></span>Cache</h4>
+                <p id="redis-text">Redis</p>
+            </div>
+        </div>
+        
+        <div class="services">
+            <div class="service-card">
+                <h3>💰 Wallet Service</h3>
+                <div class="endpoint">
+                    <span class="method post">POST</span>
+                    <span class="url">/wallet/submit/</span>
+                </div>
+                <p><strong>Features:</strong></p>
+                <ul>
+                    <li>Idempotency support</li>
+                    <li>Atomic transactions</li>
+                    <li>Race condition protection</li>
+                    <li>Audit logging</li>
+                </ul>
+            </div>
+            
+            <div class="service-card">
+                <h3>📦 Inventory Service</h3>
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <span class="url">/inventory/products/</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method post">POST</span>
+                    <span class="url">/inventory/stock/add/</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method post">POST</span>
+                    <span class="url">/inventory/stock/reserve/</span>
+                </div>
+                <p><strong>Features:</strong></p>
+                <ul>
+                    <li>Stock reservations with TTL</li>
+                    <li>Movement tracking</li>
+                    <li>Atomic stock updates</li>
+                    <li>Automatic cleanup</li>
+                </ul>
+            </div>
+            
+            <div class="service-card">
+                <h3>🛒 Order Service</h3>
+                <div class="endpoint">
+                    <span class="method post">POST</span>
+                    <span class="url">/orders/create/</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method post">POST</span>
+                    <span class="url">/orders/payment/process/</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <span class="url">/orders/user/orders/</span>
+                </div>
+                <p><strong>Features:</strong></p>
+                <ul>
+                    <li>Multi-step workflow</li>
+                    <li>Payment integration</li>
+                    <li>Status tracking</li>
+                    <li>Automatic refunds</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🧪 System Testing</h3>
+            <button class="button" onclick="runTests()">Run Comprehensive Tests</button>
+            <button class="button" onclick="clearOutput()">Clear Output</button>
+            <button class="button" onclick="checkStatus()">Check Status</button>
+            <div id="test-output">Click "Run Comprehensive Tests" to test all APIs...</div>
+        </div>
+        
+        <div class="footer">
+            <h3>🔗 Quick Links</h3>
+            <a href="/admin/" class="button" target="_blank">Admin Panel</a>
+            <a href="/inventory/products/" class="button" target="_blank">Products API</a>
+            <a href="./API_DOCUMENTATION.md" class="button" target="_blank">Documentation</a>
+            <button class="button" onclick="openAPI()">Open API Explorer</button>
+        </div>
+    </div>
+
+    <script>
+        let testOutput = document.getElementById('test-output');
+        
+        function log(message) {
+            testOutput.textContent += message + '\n';
+            testOutput.scrollTop = testOutput.scrollHeight;
+        }
+        
+        function clearOutput() {
+            testOutput.textContent = '';
+        }
+        
+        async function checkStatus() {
+            log('🔍 Checking system status...');
+            
+            // Check web service
+            try {
+                const response = await fetch('/inventory/products/');
+                if (response.ok) {
+                    document.getElementById('web-status').className = 'status-indicator online';
+                    document.getElementById('web-text').textContent = 'Online';
+                    log('✅ Web service: Online');
+                } else {
+                    throw new Error('Response not OK');
+                }
+            } catch (error) {
+                document.getElementById('web-status').className = 'status-indicator offline';
+                document.getElementById('web-text').textContent = 'Offline';
+                log('❌ Web service: Offline');
+            }
+            
+            // Database and Redis status would be checked through APIs
+            log('📊 Status check complete');
+        }
+        
+        async function runTests() {
+            clearOutput();
+            log('🚀 Starting comprehensive system tests...');
+            log('=' * 50);
+            
+            try {
+                // Test 1: Check if system is responsive
+                log('\n📡 Test 1: System Connectivity');
+                const productsResponse = await fetch('/inventory/products/');
+                if (productsResponse.ok) {
+                    const products = await productsResponse.json();
+                    log(`✅ Products API: Found ${products.products.length} products`);
+                    
+                    // Show first few products
+                    products.products.slice(0, 3).forEach(product => {
+                        log(`   - ${product.name}: $${product.price} (Stock: ${product.stock_quantity})`);
+                    });
+                } else {
+                    log('❌ Products API: Failed');
+                    return;
+                }
+                
+                // Test 2: Admin authentication required for most operations
+                log('\n🔐 Test 2: Authentication Check');
+                log('ℹ️ Most operations require authentication');
+                log('   Please log in to admin panel first: /admin/');
+                log('   Default credentials: admin/admin');
+                
+                // Test 3: Basic API structure
+                log('\n🧪 Test 3: API Structure Validation');
+                
+                const testEndpoints = [
+                    { url: '/inventory/products/', method: 'GET', name: 'Product List' },
+                ];
+                
+                for (const endpoint of testEndpoints) {
+                    try {
+                        const response = await fetch(endpoint.url);
+                        if (response.ok) {
+                            log(`✅ ${endpoint.name}: OK (${response.status})`);
+                        } else {
+                            log(`⚠️ ${endpoint.name}: ${response.status} ${response.statusText}`);
+                        }
+                    } catch (error) {
+                        log(`❌ ${endpoint.name}: Failed - ${error.message}`);
+                    }
+                }
+                
+                log('\n📋 Test Summary:');
+                log('✅ System is running and responsive');
+                log('⚠️ Full testing requires authentication');
+                log('💡 Use the Python test script for complete testing:');
+                log('   python test_system.py');
+                
+            } catch (error) {
+                log(`❌ Test failed: ${error.message}`);
+            }
+        }
+        
+        function openAPI() {
+            const apiExplorer = window.open('', '_blank');
+            apiExplorer.document.write(`
+                <html>
+                <head><title>API Explorer</title></head>
+                <body style="font-family: monospace; padding: 20px;">
+                    <h2>🔌 API Explorer</h2>
+                    <h3>Available Endpoints:</h3>
+                    <pre>
+GET  /inventory/products/                    - List all products
+GET  /inventory/products/{id}/               - Get product details
+POST /inventory/stock/add/                   - Add stock to product
+POST /inventory/stock/reserve/               - Reserve stock for order
+POST /inventory/stock/confirm/               - Confirm stock reservation
+POST /inventory/stock/release/               - Release stock reservation
+
+POST /orders/create/                         - Create new order
+GET  /orders/{id}/                          - Get order details
+GET  /orders/user/orders/                   - List user orders
+POST /orders/payment/process/               - Process order payment
+POST /orders/cancel/                        - Cancel order
+
+POST /wallet/submit/                        - Top-up wallet balance
+
+GET  /admin/                                - Admin panel
+                    </pre>
+                    <p><strong>Note:</strong> Most endpoints require authentication.</p>
+                    <p><strong>Test Credentials:</strong> admin/admin</p>
+                </body>
+                </html>
+            `);
+        }
+        
+        // Check status on page load
+        window.addEventListener('load', checkStatus);
+        
+        // Auto-refresh status every 30 seconds
+        setInterval(checkStatus, 30000);
+    </script>
+</body>
+</html>

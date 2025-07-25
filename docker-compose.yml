@@ -16,11 +16,16 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
 
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
+    networks:
+      - app-network
 
   web:
     build: .
@@ -39,6 +44,46 @@ services:
     volumes:
       - .:/app
     entrypoint: ./entrypoint.sh
+    networks:
+      - app-network
+
+  # Additional web instance for load balancing (commented out for now)
+  # web2:
+  #   build: .
+  #   ports:
+  #     - "8001:8000"
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_started
+  #   environment:
+  #     - DEBUG=1
+  #     - SECRET_KEY=dev
+  #     - DATABASE_URL=postgres://postgres:postgres@db:5432/idempo
+  #     - REDIS_URL=redis://redis:6379/0
+  #   volumes:
+  #     - .:/app
+  #   entrypoint: ./entrypoint.sh
+  #   networks:
+  #     - app-network
+
+  # Nginx load balancer (commented out for now)
+  # nginx:
+  #   image: nginx:alpine
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf
+  #   depends_on:
+  #     - web
+  #     - web2
+  #   networks:
+  #     - app-network
 
 volumes:
   db_data:
+
+networks:
+  app-network:
+    driver: bridge

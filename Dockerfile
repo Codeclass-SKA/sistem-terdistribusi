@@ -8,3 +8,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends readline-common
     rm -rf /var/lib/apt/lists/*
 
 COPY . .
+# Make entrypoint.sh executable
+RUN chmod +x entrypoint.sh

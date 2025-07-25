@@ -2,3 +2,5 @@
 .venv
 __pycache__/
 wallet/__pycache__/
+core/__pycache__/
+forge.yaml
